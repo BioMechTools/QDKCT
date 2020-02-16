@@ -10,7 +10,7 @@ addpath(['..' filesep 'coordinate' filesep 'geom3d']) ;
 %% set the data path
 str_main_path = '..\..\Data\ProcessedData\';
 %% Target folder for stl
-str_BoneSide = 'R';
+str_BoneSide = 'L';
 str_Subject = 'S007';
 
 femPath = [str_main_path str_Subject '\stlNew\DynamicResample\Femur_' str_BoneSide '_Static.stl' ] ;
