@@ -1,0 +1,232 @@
+function [ ] = plotFemurDiagInfo( DiagInfo,stlData )
+%PLOTFEMURDIAGINFO Visualised the different steps to undertaken to
+%generate the femoral reference frame in CSfemurMAX
+%   plotFemurDiagInfo(DiagInfo, F, V)
+%
+%---Input
+%   DiagInfo    -   Second output of CSfemurMAX. 
+%   F           -   Faces. N by 3 integer array
+%   V           -   Vertices. N by 3 array.
+%       Make sure DiagInfo is generated on the basis of these F and V
+%
+%  Example usage:
+%    [FemurFrame, DiagInfo] = CSfemurMAX(F, V, XYZest) ;
+%    plotFemurDiagInfo(DiagInfo,F,V) ;
+%
+%  see also: CSfemurMAX 
+
+%Chagelog
+%1.1, fixed a typo with the getReport at the end
+
+%try block makes sure no error is thrown when the CSpatellaMAX didnt finish
+F = stlData.F ;
+V = stlData.V ;
+try
+    figure(1337)
+    plotPlacer(4) ;
+    
+    ccCyl1 = rand(1,3) ;
+    ccCyl2 = rand(1,3) ;
+    ccFem = rand(1,3) ;
+    ccDiaph = rand(1,3) ;
+    ccCondyles= rand(1,3) ;
+    ccPlane1 = rand(1,3);
+    ccPlane2 = rand(1,3) ;
+    ccCylLR = rand(2,3) ;
+    ccPlanePT2 = rand(1,3) ;
+    
+    ccMirandaAx = eye(3) * .5 ;
+    ccIAdiaph = lines(3)  ;
+    ccIAdiaph = ccIAdiaph([2 3 1],:) ;
+    ccMaxAx = eye(3) ;
+    ccIAfemur  = jet(3)  ;
+    ccIAfemur = ccIAfemur(:,3:-1:1) ;
+    ccIAfemur(1,3) = 0.4 ;
+    
+    plotPlacer ; hold on; axis equal;axis tight; view(3) ;
+    title('1: Femoral Intertial axes');
+    patch('Faces',F,'Vertices',V,'FaceColor',ccFem,'EdgeColor','none','FaceAlpha',0.6);
+    plotCoords(DiagInfo.IA.Femur.IA,DiagInfo.IA.Femur.CM,'Color',ccIAfemur) ;
+    drawLine3d([DiagInfo.IA.Femur.CM,DiagInfo.IA.Femur.IA(:,1)'])
+    
+    
+    plotPlacer ; hold on; %axis equal;axis tight; view(3) ;
+    title('2: Cross section area along femoral IA axis');
+    plot(DiagInfo.crossSect.section,DiagInfo.crossSect.data,'b','LineWidth',2)
+    plot(DiagInfo.crossSect.section(DiagInfo.crossSect.i1),DiagInfo.crossSect.data(DiagInfo.crossSect.i1),'o','MarkerSize',8,'LineWidth',2,'MarkerEdgeColor','r','MarkerFaceColor','w')
+    text(DiagInfo.crossSect.section(DiagInfo.crossSect.i1),DiagInfo.crossSect.data(DiagInfo.crossSect.i1),'  \leftarrow 1st location')
+    plot(DiagInfo.crossSect.section(DiagInfo.crossSect.i2),DiagInfo.crossSect.data(DiagInfo.crossSect.i2),'o','MarkerSize',8,'LineWidth',2,'MarkerEdgeColor','r','MarkerFaceColor','w')
+    text(DiagInfo.crossSect.section(DiagInfo.crossSect.i2),DiagInfo.crossSect.data(DiagInfo.crossSect.i2),'  \leftarrow 2nd location')
+    plot(DiagInfo.crossSect.section(DiagInfo.crossSect.i3),DiagInfo.crossSect.data(DiagInfo.crossSect.i3),'o','MarkerSize',8,'LineWidth',2,'MarkerEdgeColor','r','MarkerFaceColor','w')
+    text(DiagInfo.crossSect.section(DiagInfo.crossSect.i3),DiagInfo.crossSect.data(DiagInfo.crossSect.i3),'  \leftarrow 3rd location')
+    plot([0 0] + DiagInfo.crossSect.section(DiagInfo.crossSect.i1),DiagInfo.crossSect.data(DiagInfo.crossSect.i1) * [1 .5],'r') ; %,'MarkerSize',8,'LineWidth',2,'MarkerEdgeColor','r','MarkerFaceColor','w')
+    plot(DiagInfo.crossSect.section(DiagInfo.crossSect.i2)*[1 1.3],DiagInfo.crossSect.data(DiagInfo.crossSect.i2)+[0 0 ],'r') ; %,'MarkerSize',8,'LineWidth',2,'MarkerEdgeColor','r','MarkerFaceColor','w')
+    xlabel('Isolated bone length [%]'),ylabel('Cross Sectional Area [mm^2]')
+    
+    
+    plotPlacer ; hold on; axis equal;axis tight; view(3) ;
+    title('3: Diaphysisal (cut at L3) inertial axes');
+    patch('Faces',DiagInfo.sections.diaphysis.F,'Vertices',DiagInfo.sections.diaphysis.V,'FaceColor',ccDiaph,'EdgeColor','none','FaceAlpha',0.5);
+    thisIA = DiagInfo.IA.diaphysis ;
+    hcd = plotCoords(thisIA.CM,thisIA.IA,'Color',ccIAdiaph );
+    
+    
+    plotPlacer ; hold on; axis equal;axis tight; view(3) ;
+    title('4: Point1: Diaphysal IA extended to distal surface');
+    patch('Faces',F,'Vertices',V,'FaceColor',ccFem,'EdgeColor','none','FaceAlpha',0.6);
+    thisIA = DiagInfo.IA.diaphysis ;
+    hcd = plotCoords(thisIA.CM,thisIA.IA,'Color',ccIAdiaph );
+    drawLine3d([thisIA.CM,thisIA.IA(:,1)'])
+    ezplotm(DiagInfo.points12.pt1,'.k','MarkerSize',25)
+    
+    
+    plotPlacer ; hold on; axis equal;axis tight; view(3) ;
+    title('5: Point2: Femoral IA extended from plane''s(at L2) CoM');
+    patch('Faces',F,'Vertices',V,'FaceColor',ccFem,'EdgeColor','none','FaceAlpha',0.6);
+    thisIA = DiagInfo.IA.Femur ;
+    plotCoords(DiagInfo.IA.Femur.IA,DiagInfo.IA.Femur.CM,'Color',ccIAfemur) ;
+    ezplotm(DiagInfo.points12.pt2_planecenter,'ko','MarkerSize',15);
+    ezplotm(DiagInfo.points12.pt2_planecenter,'kx','MarkerSize',15);
+    ezplotm(DiagInfo.points12.pt2 ,'.k','MarkerSize',25)
+    dp = drawPlane3d(DiagInfo.points12.pt2_plane) ;
+    set(dp,'FaceAlpha',0.4,'FaceColor',ccPlanePT2)
+    drawLine3d([DiagInfo.points12.pt2_planecenter,thisIA.IA(:,3)'])   ;
+    
+    
+    plotPlacer ; hold on; axis equal;axis tight; view(3) ;
+    title('6: First condyle cut with p1, p2, and femoral IA');
+    patch('Faces',F,'Vertices',V,'FaceColor',ccFem,'EdgeColor','none','FaceAlpha',0.6);
+    ezplotm(DiagInfo.points12.pt2,'.k','MarkerSize',12) ;
+    ezplotm(DiagInfo.IA.Femur.CM,'.k','MarkerSize',12) ;
+    plotCoords(DiagInfo.IA.Femur.CM,DiagInfo.IA.Femur.IA,'Color',ccIAfemur) ;
+    ezplotm([DiagInfo.points12.pt1;DiagInfo.points12.pt2],'.k','MarkerSize',25) ;
+    thisMesh = DiagInfo.sections.condyles1 ;
+    patch('Faces',thisMesh.F,'Vertices',thisMesh.V,'FaceColor','none','edgeAlpha',0.4) ;
+    hpc1 = drawPlane3d(DiagInfo.sections.condyles1.cutPlane) ;
+    set(hpc1,'FaceColor',ccPlane1 ,'EdgeColor',ccPlane1 ,'FaceAlpha',0.5);
+    
+    
+    plotPlacer ; hold on; axis equal;axis tight; view(3) ;
+    title('7: First condyle cylinder fit');
+    thisMesh = DiagInfo.sections.condyles1 ;
+    patch('Faces',thisMesh.F,'Vertices',thisMesh.V,'FaceAlpha',0.5,'edgeColor','none','FaceColor',ccCondyles) ;
+    thisCyl = DiagInfo.fitCylinders.Miranda1 ;
+    mirandaCylLenght = 70 ;
+    plotCylinder( thisCyl.center'-mirandaCylLenght/2*thisCyl.axis', thisCyl.center'+mirandaCylLenght/2*thisCyl.axis', thisCyl.axis, thisCyl.radius,ccCyl1) ;
+    
+    plotPlacer ;hold on; axis equal; view(3) ;
+    title('8: Recut condyles with p1, p2 and first fit''s direction')
+    patch('Faces',F,'Vertices',V,'FaceColor',ccFem ,'EdgeColor','none','FaceAlpha',0.4);
+    hpc1 = drawPlane3d(DiagInfo.sections.condyles1.cutPlane) ;
+    set(hpc1,'FaceColor',ccPlane1 ,'EdgeColor',ccPlane1 ,'FaceAlpha',0.5);
+    hpc2 = drawPlane3d(DiagInfo.sections.condyles2.cutPlane) ;
+    set(hpc2,'FaceColor',ccPlane2 ,'EdgeColor',ccPlane2,'FaceAlpha',0.7);
+    %round to the 3 most significant digits to ignore round of errors
+    [~,InotIn2] = setdiff(round(DiagInfo.sections.condyles1.V,3,'significant'),round(DiagInfo.sections.condyles2.V,3,'significant'),'rows') ;
+    [~,InotIn1] = setdiff(round(DiagInfo.sections.condyles2.V,3,'significant'),round(DiagInfo.sections.condyles1.V,3,'significant'),'rows') ;
+    dif12 = DiagInfo.sections.condyles1.V(InotIn2,:) ;
+    dif21 = DiagInfo.sections.condyles2.V(InotIn1,:) ;
+    plot3(dif12(:,1),dif12(:,2),dif12(:,3),'.m') ;
+    plot3(dif21(:,1),dif21(:,2),dif21(:,3),'.b') ;
+    mirandaCylLenght = 80 ;
+    thisCyl = DiagInfo.fitCylinders.Miranda1 ;
+    plotCylinder( thisCyl.center'-mirandaCylLenght/2*thisCyl.axis', thisCyl.center'+mirandaCylLenght/2*thisCyl.axis', thisCyl.axis, thisCyl.radius,ccCyl1) ;
+    %look along the intersection line
+    planesIntersect = intersectPlanes(DiagInfo.sections.condyles1.cutPlane,DiagInfo.sections.condyles2.cutPlane) ;
+    a = gca ; a.CameraTargetMode = 'manual' ; a.CameraPositionMode = 'manual' ;
+    a.CameraTarget = planesIntersect(1:3) ;  a.CameraPosition = planesIntersect(1:3)  + planesIntersect(4:6) / rssq(planesIntersect(4:6)) * 5000 ;
+    
+    
+    plotPlacer ;hold on; axis equal; view(3) ;
+    title('9: Second fit and determining Miranda origin')
+    thisMesh = DiagInfo.sections.condyles2 ;
+    patch('Faces',thisMesh.F,'Vertices',thisMesh.V,'FaceAlpha',0.5,'edgeColor','none','FaceColor',ccCondyles) ;
+    thisCyl = DiagInfo.fitCylinders.Miranda2 ;
+    plotCylinder( thisCyl.center'-mirandaCylLenght/2*thisCyl.axis', thisCyl.center'+mirandaCylLenght/2*thisCyl.axis', thisCyl.axis, thisCyl.radius,ccCyl2) ;
+    ezplotm(DiagInfo.miranda.epicondyle_1,'xw')
+    ezplotm(DiagInfo.miranda.epicondyle_2,'xw')
+    drawLine3d([thisCyl.center ,thisCyl.axis])
+    plotCoords(DiagInfo.miranda.CS,'Color',ccMirandaAx)
+    
+    
+    plotPlacer ;hold on; axis equal; view(3) ;
+    title('10: Finding the articulating surfaces with measures')
+    thisMesh = DiagInfo.sections.condyles2 ;
+    patch('Faces',thisMesh.F,'Vertices',thisMesh.V,'FaceAlpha',0.5,'edgeColor','none','FaceColor',ccCondyles) ;
+    %interpret DiagInfo.sections.artSurfaces.constraintIndices as a binary
+    %array to select the colors
+    ccindex = sum(bsxfun(@times,DiagInfo.sections.artSurfaces.constraintIndices(2:end,:),((1:4).^2)')) ;
+    cc = jet(31) ;
+    cc(end,:) = [0 0 0] ;
+    v = DiagInfo.sections.condyles2.V ;
+    scatter3(v(:,1),v(:,2),v(:,3),12,cc(ccindex+1,:),'fill')
+    hp(1) = drawPlane3d( DiagInfo.sections.artSurfaces.backPlane) ;
+    hp(2) = drawPlane3d( DiagInfo.sections.artSurfaces.midPlane) ;
+    set(hp,'FaceAlpha',0.2,'FaceColor',zeros(1,3))  ;
+    hl = drawLine3d([thisCyl.center ,thisCyl.axis])  ;
+    set(hl,'LineWidth',3) ;
+    
+    
+    figure(137) ; clf
+    ccSI = DiagInfo.sections.artSurfaces.constraintIndices ;
+    ccArtConstr = [1 0 0 ; 0 0 1] ;
+    thisCyl = DiagInfo.fitCylinders.Miranda2 ;
+    tits = {'Combined','Vertex normals','Back plane distance','Mid plane dist','Axis distance'} ;
+    for i = 1  : size(ccSI,1)
+        subplot(2,3,i) ; hold on ; axis equal ; view(3) ;
+        scatter3(v(:,1),v(:,2),v(:,3),12,ccArtConstr(ccSI(i,:)+1,:),'fill')
+    
+        title(tits{i})
+        if any(i == [3])
+            ph2 = drawPlane3d(DiagInfo.sections.artSurfaces.backPlane) ;
+            set(ph2,'FaceAlpha',0.4)
+        end
+        if any(i== [4])
+            ph2 = drawPlane3d(DiagInfo.sections.artSurfaces.midPlane) ;
+            set(ph2,'FaceAlpha',0.4)
+        end
+        if any(i == [2 5]) ;
+            hl = drawLine3d([thisCyl.center ,thisCyl.axis])  ;
+            set(hl,'LineWidth',3) ;
+        end
+    end
+    
+    
+    plotPlacer ;hold on; axis equal; view(3) ;
+    title('11: 3rd cylinder fits and centroid determination')
+    artCylL = 20 ;
+    thisMesh = DiagInfo.sections.condyles2 ;
+    patch('Faces',thisMesh.F,'Vertices',thisMesh.V,'FaceAlpha',0.5,'edgeColor','none','FaceColor',ccCondyles) ;
+    phM = patch('Faces',DiagInfo.sections.articulatingSurface1.F,'Verti',DiagInfo.sections.articulatingSurface1.V,'FaceAlpha',0.0) ;
+    phM = patch('Faces',DiagInfo.sections.articulatingSurface2.F,'Verti',DiagInfo.sections.articulatingSurface2.V,'FaceAlpha',0.0) ;
+    thisCyl = DiagInfo.fitCylinders.condyle1 ;
+    plotCylinder( thisCyl.center'-artCylL/2*thisCyl.axis', thisCyl.center'+artCylL/2*thisCyl.axis', thisCyl.axis, thisCyl.radius,ccCylLR(1,:)) ;
+    thisCyl = DiagInfo.fitCylinders.condyle2 ;
+    plotCylinder( thisCyl.center'-artCylL/2*thisCyl.axis', thisCyl.center'+artCylL/2*thisCyl.axis', thisCyl.axis, thisCyl.radius,ccCylLR(2,:)) ;
+    ezplotm([DiagInfo.sections.articulatingSurface1.centroid,DiagInfo.sections.articulatingSurface2.centroid],'.m','MarkerSize',15)
+    drawLine3d([DiagInfo.sections.articulatingSurface1.centroid', DiagInfo.fitCylinders.condyle1.axis])
+    drawLine3d([DiagInfo.sections.articulatingSurface2.centroid', DiagInfo.fitCylinders.condyle2.axis])
+    phM = patch('Faces',DiagInfo.sections.articulatingSurface1.F,'Verti',DiagInfo.sections.articulatingSurface1.V,'FaceAlpha',0) ;
+    ezplotm([DiagInfo.sections.articulatingSurface1.surfaceCentroid;DiagInfo.sections.articulatingSurface2.surfaceCentroid],'k.')
+    
+    
+    plotPlacer ;hold on; axis equal; view(3) ;
+    title({'12: Result','ML: connect centroids','PD: in plane ML & diaph IA axis'})
+    thisMesh = DiagInfo.sections.condyles2 ;
+    patch('Faces',thisMesh.F,'Vertices',thisMesh.V,'FaceAlpha',0.5,'edgecolor','none','FaceColor',ccCondyles) ;
+    ezplotm([DiagInfo.sections.articulatingSurface1.centroid,DiagInfo.sections.articulatingSurface2.centroid],'.-m','MarkerSize',15)
+    plotCoords(DiagInfo.refFrame,'Color',ccMaxAx)
+    phM = patch('Faces',DiagInfo.sections.articulatingSurface2.F,'Verti',DiagInfo.sections.articulatingSurface2.V,'FaceAlpha',0) ;
+    phM = patch('Faces',DiagInfo.sections.articulatingSurface1.F,'Verti',DiagInfo.sections.articulatingSurface1.V,'FaceAlpha',0.0) ;
+    plotCoords(DiagInfo.IA.diaphysis.IA,DiagInfo.IA.diaphysis.CM,'Color',ccIAdiaph)
+catch em
+    if ~DiagInfo.failed
+        rethrow(em) ;
+    else
+        DiagInfo.errorMessage.getReport ;
+    end
+end
+
+
+end
+

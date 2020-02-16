@@ -1,0 +1,80 @@
+function [  ] = plotTibiaDiagInfo( DiagInfo,stlData)
+%PLOTTIBIADIAGINFO Visualised the different steps to undertaken to
+%generate the tibial reference frame in CStibiaMAX
+%   plotTibiaDiagInfo(DiagInfo, F, V)
+%
+%---Input
+%   DiagInfo    -   Second output of CStibiaMAX. 
+%   F           -   Faces. N by 3 integer array
+%   V           -   Vertices. N by 3 array.
+%       Make sure DiagInfo is generated on the basis of these F and V
+%
+%  Example usage:
+%    [TibiaFrame, DiagInfo] = CStibiaMAX(F, V, XYZest) ;
+%    plotTibiaDiagInfo(DiagInfo,F,V) ;
+%
+%  (V1.1) ORL Nijmegen, Max Bakker 2016
+%
+%  see also: CStibiaMAX 
+
+
+%Chagelog
+%1.1, fixed a typo with the getReport at the end
+
+%try block makes sure no error is thrown when the ERFrefFrameTibia didnt finish
+F = stlData.F ;
+V = stlData.V ;
+try
+    figure(751) ;clf
+    ccFem = rand(3,1) ;
+    ccPlat = 1-ccFem ;
+    
+    subplot(2,2,1) ;  axis equal; hold on ; view(3)
+    title('1: Tibial Inertial Axes');
+    patch('Faces',F,'Vertices',V,'faceAlpha',0.3,'EdgeAlpha',0.2,'FaceColor',ccFem) ;
+    plotCoords(DiagInfo.IA.Tibia.IA,DiagInfo.IA.Tibia.CM) ;
+    drawLine3d([DiagInfo.IA.Tibia.CM,DiagInfo.IA.Tibia.IA(:,1)'],'r')
+    
+    subplot(2,2,2) ;   hold on ;
+    title('2: Cross section area along tibial IA axis');
+    plot(DiagInfo.crossSect.section,DiagInfo.crossSect.data,'b','LineWidth',2)
+    plot(DiagInfo.crossSect.section(DiagInfo.crossSect.i1),DiagInfo.crossSect.data(DiagInfo.crossSect.i1),'o','MarkerSize',8,'LineWidth',2,'MarkerEdgeColor','r','MarkerFaceColor','w')
+    text(DiagInfo.crossSect.section(DiagInfo.crossSect.i1),DiagInfo.crossSect.data(DiagInfo.crossSect.i1),'  \leftarrow 1st location')
+    xlabel('Isolated bone length [%]'),ylabel('Cross Sectional Area [mm^2]')
+    
+    
+    subplot(2,2,3);   axis equal; hold on ; view(3)
+    title('3: Plane at 1st location separating plateau');
+    patch('Faces',F,'Vertices',V,'faceAlpha',0.3,'EdgeColor','none','FaceColor',ccFem) ;
+    patch('Faces',DiagInfo.sections.Plateau.F,'Vertices',DiagInfo.sections.Plateau.V,'FaceColor','none','EdgeAlpha',0.6,'FaceColor',ccPlat) ;
+    drawPlane3d(DiagInfo.sections.Plateau.cutPlane,'m','FaceAlpha',0.3)
+    
+    
+    subplot(2,2,3);   axis equal; hold on ; view(3)
+    patch('Faces',F,'Vertices',V,'faceAlpha',0.3,'EdgeColor','none','FaceColor',ccFem) ;
+    patch('Faces',DiagInfo.sections.Plateau.F ,'Vertices',DiagInfo.sections.Plateau.V,'FaceColor','none','EdgeAlpha',0.6,'FaceColor',ccPlat) ;
+    drawPlane3d(DiagInfo.sections.Plateau.cutPlane,'m','FaceAlpha',0.3)
+    
+    
+    %showing hte last thing in the reference frame coordiante system
+    %   (excluding origin)
+    rotM =  [DiagInfo.refFrame.X;DiagInfo.refFrame.Y;DiagInfo.refFrame.Z] ;
+    Vpl_CSl = (rotM * DiagInfo.sections.Plateau.V')' ;
+    fn = fieldnames(DiagInfo.refFrame) ;
+    for fi =1   : numel(fn)
+        refFrame_CSl.(fn{fi}) = (rotM * DiagInfo.refFrame.(fn{fi})')' ;
+    end
+    
+    subplot(2,2,4);   axis equal; hold on ; view(3)
+    title('Reference frame based on plateau''s IA') ;
+    patch('Faces',DiagInfo.sections.Plateau.F,'Vertices',Vpl_CSl,'faceAlpha',0.2,'EdgeAlpha',0.2,'FaceColor',ccPlat) ;
+    patch('Faces',F,'Vertices',(rotM*V')','faceAlpha',0.2,'EdgeAlpha',0,'FaceColor',ccFem) ;
+    plotCoords(refFrame_CSl)%DiagInfo.refFrame,(rotM*DiagInfo.refFrame.origin')')
+catch em
+    if ~DiagInfo.failed
+        rethrow(em) ;
+    else
+        DiagInfo.errorMessage.getReport ;
+    end
+end
+end
