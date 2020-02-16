@@ -2,8 +2,6 @@
 If you find this code useful in your research, please consider citing:
 'A robust and semi-automatic quantitative measurement of patellofemoral instability based on four dimensional computed tomography'
 
-# Table of Content
-
 # Preparation
 * Download the codes and data
 * Move the folder "Data" to root directory, which is parent directory of "DKCT_Quatitative_Measurement"
