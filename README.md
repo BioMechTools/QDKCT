@@ -15,8 +15,9 @@ You can have a first glance of the final result by running the "Animation/DKCT_A
 * The first step is to determine the anatomical coordinate frame through running "AnatomicalCoordinateFrame\coordinate_main.m"
 * The second step is to determine the transform information from the 3D CT to the 4D CT through "CPD_Registration\cpd_morph_static2dynamic_cut_version.m"
 * The third step is to determine the transform information among 4D CT scans through "CPD_Registration\cpd_morph_dynamics_cut_version_5_1_11.m"
-* The fourth step is to identify the landmarks from the shape models "Quantitative_measurement\cal_landmark_main.m"
-* The fifth step is to identify the TT-TG/PC-TG distance through "Quantitative_measurement\cal_TT_TG_PC_TG_dynamic_distance_main.m"
+* The fourth step is to organize all the rotation matrix through "CPD_Registration\convert_newrotation2oldrotation_main.m" and copy all "TransformPre\rigidD(n)toD(n+1)(bone)(side)" to "Transform\"
+* The fifth step is to identify the landmarks from the shape models "Quantitative_measurement\cal_landmark_main.m"
+* The sixth step is to identify the TT-TG/PC-TG distance through "Quantitative_measurement\cal_TT_TG_PC_TG_dynamic_distance_main.m"
 
 # Others
 * To make use of Yao's method to adjust the TT-TG distance by considering the disagreement between the axial CT scan and the anatomical axial scan, you can reference the code "Quantitative_measurement\cal_TT_TG_distance_main.m"
