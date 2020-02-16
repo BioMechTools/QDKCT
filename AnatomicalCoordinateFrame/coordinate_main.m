@@ -8,7 +8,7 @@ addpath(['..' filesep 'coordinate' filesep 'Source']) ;
 addpath(['..' filesep 'coordinate' filesep 'geom3d']) ;
 %filesep is either /  or \, depending on the OS
 %% set the data path
-str_main_path = 'I:\UT\DKCT_Quantitative_Measurement\Data\';
+str_main_path = '..\..\Data\ProcessedData\';
 %% Target folder for stl
 str_BoneSide = 'R';
 str_Subject = 'S007';

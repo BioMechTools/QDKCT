@@ -9,21 +9,18 @@ addpath('..\visualization\')
 % addpath('..\..\function\')
 % str_source = 'I:\UT\DKCT\ProcessDataNew\';
 addpath('..\')
-[str_sourceNew, str_figure,str_figure_landmark,str_manual] = set_path();
-for numSubject = 6:6
-    if numSubject>1
-        n_subj = numSubject+1;
-    else
-        n_subj = numSubject;
-    end
+%% folder definition
+str_sourceNew = '..\\..\\Data\\ProcessedData\\';
+str_figure_landmark = '..\\..\\Data\\Draw\\landmarks\\';
+str_figure = '..\\..\\Data\\Draw\\raw\\';
+str_manual = '..\\..\\Data\\ManualTT_TG\\';
+
+for n_subj = 7:7
     str_subject = ['S00' num2str(n_subj)];
     for numSide = 1:2
         if numSide==1
             str_BoneSide = 'R';
         else
-            if n_subj == 4
-                continue;
-            end
             str_BoneSide = 'L';
         end
         str_Dynamic2DynamicFolder = [str_sourceNew str_subject '\\matlab\\Transform\\'];
@@ -108,8 +105,8 @@ for numSubject = 6:6
             currentCoordinatePatella(4,1:3)=transformPointsForward(regstr_matrixPat,currentCoordinatePatella(4,1:3));
             PatTGdisList(num+2)=cal_TT_TG_dis(TT_TG_RefPoints(1:2,:),TT_TG_RefPoints(3,:),currentCoordinatePatella(4,1:3),femCoords.ML,str_BoneSide);
 
-%             drawSTL_TT_TG( Femur, Tibia, Patella, ...
-%             currentCoordinatePatella(4,1:3),TT_TG_RefPoints(3,:),TT_TG_RefPoints(1:2,:));
+            drawSTL_TT_TG( Femur, Tibia, Patella, ...
+            currentCoordinatePatella(4,1:3),TT_TG_RefPoints(3,:),TT_TG_RefPoints(1:2,:));
         end
         [TFrot, TFtrans]= calcJCSkin(A, B, lower(str_BoneSide));
 %         if strcmp(str_BoneSide,'L')
@@ -121,26 +118,3 @@ for numSubject = 6:6
         save([str_TT_TG_Folder 'TFrot_List_' str_BoneSide],'TFrot');
     end
 end
-
-
-function [femCoords]=cal_Femur_direction(Femur, Tibia, Patella)
-
-%%% calculate the intial coordinates
-axEst = calculateExternalFrame(Femur.V,Patella.V,Tibia.V) ;
-
-%%% Femur
-%calculate and apply the reference lenght
-[refL,VcsL,IA] = computeReferenceLength(Femur.V) ;
-refLinPerc = refL*2 ./ range(VcsL(:,1)) *100;
-if sign(dot(axEst.Y,IA(:,1)'))==1
-    percRange = [0 refLinPerc] ;
-else
-    percRange = [100-refLinPerc 100] ;
-end
-[Femur.F, VcsL] = cutMeshByPercent(Femur.F,VcsL,percRange,1,1) ;
-%rotate back to original CS
-Femur.V = (IA'\VcsL')' ;
-[femCoords] = DKCTrefFrameFemur(Femur.F,Femur.V,axEst);
-
-end
-

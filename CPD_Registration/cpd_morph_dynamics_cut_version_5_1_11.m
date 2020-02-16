@@ -2,7 +2,7 @@ clear all; close all; clc;
 addpath(['..' filesep 'CPD_registration' filesep 'function']) ;
 addpath(['..' filesep 'CPD_registration' filesep 'core']) ;
 str_folder = '..\\..\\Data\\';
-str_DynamicFolder = '..\\..\\Data\\';
+str_DynamicFolder = '..\\..\\Data\\ProcessedData\\';
 SubjectNumber = 'S007';
 nFrameNum = 5;
 str_BoneType = 'Patella';%%% choose patella, tibia, and femur

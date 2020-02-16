@@ -8,14 +8,14 @@ addpath('..\basic_function\')
 addpath('..\coordinate\Source')
 addpath('..\')
 
+%% folder definition
+str_sourceNew = '..\\..\\Data\\ProcessedData\\';
+str_figure_landmark = '..\\..\\Data\\Draw\\landmarks\\';
+str_figure = '..\\..\\Data\\Draw\\raw\\';
+str_manual = '..\\..\\Data\\ManualTT_TG\\';
+
 %% Data Input
-[str_sourceNew, str_figure,str_figure_landmark,str_manual] = set_path();
-for numSubject = 1:8
-    if numSubject>1
-        n_subj = numSubject+1;
-    else
-        n_subj = numSubject;
-    end
+for n_subj = 7
     str_subject = ['S00' num2str(n_subj)];
     for numSide = 1:2
         if numSide==1
@@ -24,21 +24,20 @@ for numSubject = 1:8
 
             str_side = 'L';
         end
-
         %%% read the manual TT and TG in static
-        str_landmarks_file =  [str_manual 'Leo1\Subject' num2str(n_subj) '_' str_side '.txt' ] ;
+        str_landmarks_file =  [str_manual 'Expert_1_1\Subject' num2str(n_subj) '_' str_side '.txt' ] ;
         matLandmarks = load(str_landmarks_file);
         staticLandmarks1 = matLandmarks(1:4,1:3);
-        str_landmarks_file =  [str_manual 'Leo2\Subject' num2str(n_subj) '_' str_side '.txt' ] ;
+        str_landmarks_file =  [str_manual 'Expert_1_2\Subject' num2str(n_subj) '_' str_side '.txt' ] ;
         matLandmarks = load(str_landmarks_file);
         staticLandmarks2 = matLandmarks(1:4,1:3);
-        str_landmarks_file =  [str_manual 'Leo3\Subject' num2str(n_subj) '_' str_side '.txt' ] ;
+        str_landmarks_file =  [str_manual 'Expert_1_3\Subject' num2str(n_subj) '_' str_side '.txt' ] ;
         matLandmarks = load(str_landmarks_file);
         staticLandmarks3 = matLandmarks(1:4,1:3);
-        str_landmarks_file =  [str_manual 'Seb\Subject' num2str(n_subj) '_' str_side '.txt' ] ;
+        str_landmarks_file =  [str_manual 'Expert_3\Subject' num2str(n_subj) '_' str_side '.txt' ] ;
         matLandmarks = load(str_landmarks_file);
         staticLandmarks4 = matLandmarks(1:4,1:3);
-        str_landmarks_file =  [str_manual 'Mar\Subject' num2str(n_subj) '_' str_side '.txt' ] ;
+        str_landmarks_file =  [str_manual 'Expert_2\Subject' num2str(n_subj) '_' str_side '.txt' ] ;
         matLandmarks = load(str_landmarks_file);
         staticLandmarks5 = matLandmarks(1:4,1:3);
         manual_TGPoint3D(1,:) = staticLandmarks1(3,:);   
@@ -115,6 +114,7 @@ for numSubject = 1:8
         n_target_ind = round((0.2*(rot_pt1(1) - min_v1)+0.8*maxInd));
         TGPoint3DTemp = zeros(6,3);
         TGPointTemp = zeros(6,2);
+        %%% an option to tune the TG, to be confirmed by larger samples
         for num = 5:-1:0
             [Landmark_RefLine, Landmark_TGPoint,Landmark_contour, Vertices_surface] = get_TG_PCL(rotM,femCoords,V_csL,cellV,secI,str_side,n_target_ind-num);
             TGPoint3DTemp(num+1,:) = Landmark_TGPoint.TGPoint3D';
@@ -134,7 +134,7 @@ for numSubject = 1:8
 
         rotM = eye(3) * rotationMatrixTib; 
         manual_TT = (rotM \ staticLandmarks1(4,:)')' ;       
-        [ Landmark_TTPoint ] = getTT( rotationMatrixTib, rotationMatrixTib,Tibia.V,Tibia.F,manual_TT);%getTT_Tibia( Tibia.V, rotationMatrixTib,2,Tibia.V,Tibia.F );
+        [ Landmark_TTPoint ] = getTT( rotationMatrixTib, rotationMatrixTib,Tibia.V,Tibia.F);%getTT_Tibia( Tibia.V, rotationMatrixTib,2,Tibia.V,Tibia.F );
         save([str_sourceNew str_subject '\matlab\Landmarks\28Tibia_Landmark_TTPoint_' str_side],'Landmark_TTPoint');
 %         saveas(gcf,['.\TibiaFrame\TT' num2str(n_subj) '_' str_side '1.png']);
         TT3D_Manual_Auto = [Landmark_TTPoint;manual_TTPoint3D];
