@@ -22,3 +22,5 @@ You can have a first glance of the final result by running the "Animation/DKCT_A
 
 # Others
 * To make use of Yao's method to adjust the TT-TG distance by considering the disagreement between the axial CT scan and the anatomical axial scan, you can reference the code "Quantitative_measurement\cal_TT_TG_distance_main.m"
+
+![](gif_for_TG_PCRL_plane.gif)
